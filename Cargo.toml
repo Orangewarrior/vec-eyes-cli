@@ -1,0 +1,20 @@
+[package]
+name = "vec-eyes-cli"
+version = "0.3.0"
+edition = "2021"
+license = "MIT"
+authors = ["Orangewarrior"]
+
+[[bin]]
+name = "vec-eyes"
+path = "src/main.rs"
+
+[features]
+default = []
+vectorscan = ["vec-eyes-lib/vectorscan"]
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+rayon = "1.10"
+serde_yaml = "0.9"
+vec-eyes-lib = { path = "../vec-eyes-lib" }
