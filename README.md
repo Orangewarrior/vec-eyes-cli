@@ -1,97 +1,216 @@
-# Vec-Eyes CLI
+# Vec-Eyes 🔍🧠
 
-Vec-Eyes CLI is the operational face of the project. It turns the library into a practical workflow for classifying real files, recursive datasets, and rule-boosted detection pipelines.
+> **High-performance behavior intelligence engine and CLI written in Rust**
 
-## Why this CLI is useful
+Vec-Eyes is a powerful, extensible behavior analysis platform designed to classify, detect, and analyze patterns across text, logs, datasets, and system traces.
 
-You can point Vec-Eyes at:
+Built with performance, flexibility, and real-world use cases in mind, Vec-Eyes combines:
+- 🧠 Machine Learning (KNN, Naive Bayes)
+- 🔡 NLP Pipelines (Tokenization, TF-IDF, Embeddings)
+- ⚡ Vector-based similarity (Word2Vec, FastText)
+- 🔎 Rule-based detection (Regex / optional VectorScan)
+- 📊 Hybrid scoring engine
 
-- mail buffers
-- phishing samples
-- HTTP attack requests
-- anomaly traces
-- malware-oriented notes
-- Fraud classify
-- biological labels and raw text corpora
+---
 
-and get a report back in CSV or JSON.
+## 🚀 Why Vec-Eyes?
 
-## Build
+Vec-Eyes is not just a spam classifier.
 
-### Default build
+It is a **behavior intelligence engine** capable of detecting patterns across multiple domains:
 
-```bash
-cargo test
-cargo run -- --help
+### 🔐 Security & Fraud Detection
+- Spam & phishing emails
+- Web attacks (SQLi, XSS, fuzzing)
+- Malware behavior
+- Fraud patterns in logs and transactions
+
+### 🧬 Biological & Scientific Classification
+Vec-Eyes can also be used for:
+- Virus pattern classification
+- Human / biological data classification
+- Bacteria & fungus identification (textual/log patterns)
+- Bioinformatics-style sequence classification (adaptable pipelines)
+
+### 📊 General Pattern Recognition
+- Log anomaly detection
+- Dataset classification
+- Behavioral clustering
+
+---
+
+## ⚙️ Core Features
+
+### 🧠 Machine Learning
+- KNN (Cosine, Euclidean, Manhattan, Minkowski)
+- Naive Bayes (Count, TF-IDF)
+
+### 🔡 NLP Engine
+- Tokenization & normalization
+- TF-IDF vectorization
+- Word2Vec (lightweight training)
+- FastText-style embeddings (subword support)
+
+### 🔎 Rule Engine
+- Regex matcher (default, no dependencies)
+- Optional high-performance engine (VectorScan)
+- YAML-driven rules with scoring system
+
+### 📊 Hybrid Scoring
+Combine:
+- ML probability
+- Rule matches
+- Custom weights
+
+---
+
+## 📂 Project Structure
+
+```
+vec-eyes-lib/
+vec-eyes-cli/
 ```
 
-### Native Vectorscan build
+---
+
+## 🧪 Example CLI Usage
 
 ```bash
-cargo test --features vectorscan
+./vec-eyes \
+  --dataset-list-hot /data/attacks \
+  --dataset-list-cold /data/normal \
+  --label WEB_ATTACK \
+  --classify-objects /files/input \
+  --method KnnCosine \
+  --k 5 \
+  --nlp-opt FastText \
+  --output-csv report.csv \
+  --output-json report.json
 ```
 
-## System packages for native Vectorscan
+---
+
+## 📄 YAML Rules (Detailed Explanation)
+
+Vec-Eyes supports a powerful YAML-based rule engine.
+
+### 🔹 Fields
+
+```yaml
+method: KnnCosine
+k: 5
+p: 2.0
+
+rules:
+  - title: Suspicious URL
+    description: Detects common spam keywords
+    match_rule: "casino|bonus|free"
+    score: 80
+```
+
+### 🧠 Field Explanation
+
+| Field        | Description |
+|-------------|------------|
+| `method`     | Classification method (KnnCosine, KnnEuclidean, KnnManhattan, KnnMinkowski, Bayes) |
+| `k`          | Required for KNN – number of neighbors |
+| `p`          | Required only for Minkowski metric |
+| `title`      | Rule name (used in logs and reports) |
+| `description`| Optional human-readable explanation |
+| `match_rule` | Pattern to match (regex or vectorscan rule) |
+| `score`      | Score (0–100) added to classification |
+
+---
+
+## 📄 YAML Example 1 (Security / Spam)
+
+```yaml
+method: KnnCosine
+k: 5
+
+rules:
+  - title: Spam Keywords
+    description: Common spam indicators
+    match_rule: "free|bonus|win|casino"
+    score: 70
+
+  - title: Suspicious IP
+    match_rule: "192\.168\.1\.100"
+    score: 100
+```
+
+---
+
+## 📄 YAML Example 2 (Biological / Scientific)
+
+```yaml
+method: KnnEuclidean
+k: 3
+
+rules:
+  - title: Virus Pattern
+    description: Detect virus-related sequences
+    match_rule: "rna|virus|mutation"
+    score: 80
+
+  - title: Bacteria Signature
+    match_rule: "e.coli|bacteria"
+    score: 60
+```
+
+---
+
+## 🏷️ Supported Labels
+
+SPAM, MALWARE, PHISHING, ANOMALY, WEB_ATTACK, FUZZING, FLOOD,FRAUD, BLOCK_LIST, RAW_DATA,  
+VIRUS, HUMAN, ANIMAL, CANCER, FUNGUS, BACTERIA
+
+---
+
+## ⚡ Performance
+
+- Rust-native 🦀
+- ndarray + BLAS ready
+- Rayon parallelism
+- High-throughput design
+
+---
+
+## 🔧 Optional VectorScan Support
 
 ### Fedora
-
 ```bash
-sudo dnf install cmake gcc gcc-c++ boost-devel
+sudo dnf install boost-devel cmake gcc gcc-c++
 ```
 
 ### Debian / Ubuntu
-
 ```bash
-sudo apt-get update
-sudo apt-get install -y build-essential cmake libboost-all-dev
+sudo apt install libboost-all-dev cmake build-essential
 ```
 
-## YAML-driven usage
-
 ```bash
-./vec-eyes --yaml-rules /path/rules.yaml --classify-objects /path/to/files
+cargo build --features vectorscan
 ```
 
-If `--yaml-rules` is provided, the CLI loads method, NLP mode, recursion, dataset paths, scoring behavior, `k`, `p`, and output files from YAML.
+---
 
-## Direct CLI usage
+## 🤝 Contributing
 
-```bash
-./vec-eyes \
-  --dataset-list-hot /data/http/attack/requests/ \
-  --dataset-list-cold /data/http/regular/requests/ \
-  --label WEB_ATTACK \
-  --load-alert-ip ip/alert/spam_address_ip.txt \
-  --load-alert-url url/alert_list/spam_url.txt \
-  --classify-objects /files/classify \
-  --threads 8 \
-  --output-csv report_2026.csv \
-  --output-json report.json \
-  --method knn-cosine \
-  --nlp-opt fast-text \
-  --k 5 \
-  --score-sum ON
-```
+Vec-Eyes is designed to evolve into a unified behavior intelligence engine.
 
-## Minkowski example
+We welcome contributions in:
+- ML improvements
+- Performance tuning
+- New datasets
+- Security rules
+- Biological classification extensions
 
-```bash
-./vec-eyes \
-  --dataset-list-hot /data/attack \
-  --dataset-list-cold /data/normal \
-  --classify-objects /queue \
-  --method knn-minkowski \
-  --nlp-opt word2-vec \
-  --k 7 \
-  --p 3.0
-```
+---
 
-## UX behavior
+## 👤 Author
 
-- running without arguments prints the long help output
-- argument parsing errors print the clap help and examples
-- the banner shows the current version and the author
+Orangewarrior
 
-## More documentation
+---
 
-See `../helper.md` for the YAML contract and the exact validation rules.
+## ⭐ Star the project if you like it!
