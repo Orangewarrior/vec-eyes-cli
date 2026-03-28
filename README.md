@@ -11,6 +11,7 @@ You can point Vec-Eyes at:
 - HTTP attack requests
 - anomaly traces
 - malware-oriented notes
+- Fraud classify
 - biological labels and raw text corpora
 
 and get a report back in CSV or JSON.
