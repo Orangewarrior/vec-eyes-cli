@@ -72,140 +72,220 @@ vec-eyes-cli/
 ```
 
 ---
+# Vec-Eyes CLI 🚀
 
-## 🧪 Example CLI Usage
+> High-performance behavior classification CLI powered by Vec-Eyes Core
+
+Vec-Eyes CLI is a production-ready command-line interface built on top of **vec-eyes-lib**, designed for real-world workflows in:
+
+- 🔐 Security (web attacks, phishing, malware)
+- 💰 Fraud detection (financial transactions, risk scoring)
+- 🧬 Biological classification (virus, bacteria, anomaly patterns)
+- 📊 General behavior intelligence pipelines
+
+---
+
+# ⚡ Why Vec-Eyes CLI?
+
+- YAML-first configuration (reproducible pipelines)
+- Multi-model ML engine (KNN, Bayes, SVM, RF, Boosting, IsolationForest)
+- Hybrid scoring (ML + rule engine)
+- Parallel execution via Rayon (`threads`)
+- Designed for **real datasets**, not toy examples
+
+---
+
+# 🚀 Quick Start
 
 ```bash
-./vec-eyes \
-  --dataset-list-hot /data/attacks \
-  --dataset-list-cold /data/normal \
-  --label WEB_ATTACK \
-  --classify-objects /files/input \
-  --method KnnCosine \
-  --k 5 \
-  --nlp-opt FastText \
-  --output-csv report.csv \
-  --output-json report.json
+cargo run --   --rules-yaml rules.yaml   --classify-objects ./samples/
 ```
 
 ---
 
-## 📄 YAML Rules (Detailed Explanation)
+# 🧪 Validate YAML
 
-Vec-Eyes supports a powerful YAML-based rule engine.
-
-### 🔹 Fields
-
-```yaml
-method: KnnCosine
-k: 5
-p: 2.0
-
-rules:
-  - title: Suspicious URL
-    description: Detects common spam keywords
-    match_rule: "casino|bonus|free"
-    score: 80
+```bash
+cargo run -- --validate-yaml rules.yaml
 ```
 
-### 🧠 Field Explanation
-
-| Field        | Description |
-|-------------|------------|
-| `method`     | Classification method (KnnCosine, KnnEuclidean, KnnManhattan, KnnMinkowski, Bayes) |
-| `k`          | Required for KNN – number of neighbors |
-| `p`          | Required only for Minkowski metric |
-| `title`      | Rule name (used in logs and reports) |
-| `description`| Optional human-readable explanation |
-| `match_rule` | Pattern to match (regex or vectorscan rule) |
-| `score`      | Score (0–100) added to classification |
+✔ Validates:
+- required parameters
+- model-specific constraints
+- dataset paths
 
 ---
 
-## 📄 YAML Example 1 (Security / Spam)
+# 📄 Example 1 — Spam Detection (KNN + FastText)
 
 ```yaml
 method: KnnCosine
+nlp: FastText
 k: 5
+threads: 4
+
+datasets:
+  hot:
+    - /data/email/spam/
+  cold:
+    - /data/email/normal/
 
 rules:
   - title: Spam Keywords
-    description: Common spam indicators
     match_rule: "free|bonus|win|casino"
     score: 70
+```
 
-  - title: Suspicious IP
-    match_rule: "192\.168\.1\.100"
-    score: 100
+Run:
+
+```bash
+vec-eyes --rules-yaml spam.yaml --classify-objects ./emails/
 ```
 
 ---
 
-## 📄 YAML Example 2 (Biological / Scientific)
+# 📄 Example 2 — Web Attack Detection (RandomForest + OOB)
 
 ```yaml
-method: KnnEuclidean
-k: 3
+method: RandomForest
+nlp: FastText
+threads: 8
+
+random_forest_mode: ExtraTrees
+random_forest_n_trees: 200
+random_forest_bootstrap: true
+random_forest_oob_score: true
+
+datasets:
+  hot:
+    - /data/http/attacks/
+  cold:
+    - /data/http/normal/
 
 rules:
-  - title: Virus Pattern
-    description: Detect virus-related sequences
-    match_rule: "rna|virus|mutation"
-    score: 80
-
-  - title: Bacteria Signature
-    match_rule: "e.coli|bacteria"
-    score: 60
+  - title: SQL Injection
+    match_rule: "union select|or 1=1"
+    score: 90
 ```
 
 ---
 
-## 🏷️ Supported Labels
+# 📄 Example 3 — Fraud Detection (Logistic Regression)
 
-SPAM, MALWARE, PHISHING, ANOMALY, WEB_ATTACK, FUZZING, FLOOD,FRAUD, BLOCK_LIST, RAW_DATA,  
-VIRUS, HUMAN, ANIMAL, CANCER, FUNGUS, BACTERIA
+```yaml
+method: LogisticRegression
+nlp: TfIdf
+threads: 4
+
+logistic_learning_rate: 0.01
+logistic_epochs: 100
+
+datasets:
+  hot:
+    - /data/fraud/high-risk/
+  cold:
+    - /data/fraud/low-risk/
+```
 
 ---
 
-## ⚡ Performance
+# 📄 Example 4 — Anomaly Detection (Isolation Forest)
 
-- Rust-native 🦀
-- ndarray + BLAS ready
-- Rayon parallelism
-- High-throughput design
+```yaml
+method: IsolationForest
+nlp: FastText
+
+isolation_forest_n_trees: 150
+isolation_forest_contamination: 0.02
+
+datasets:
+  hot:
+    - /data/anomaly/outliers/
+  cold:
+    - /data/anomaly/normal/
+```
 
 ---
 
-## 🔧 Optional VectorScan Support
+# ⚙️ CLI Arguments Overview
 
-### Fedora
+| Argument | Description |
+|--------|------------|
+| `--rules-yaml` | Path to YAML config |
+| `--validate-yaml` | Validate config only |
+| `--classify-objects` | Directory of files to classify |
+| `--threads` | Override thread count |
+| `--output-json` | Export results as JSON |
+| `--output-csv` | Export results as CSV |
+
+---
+
+# 🧠 Performance Notes
+
+- `threads` controls Rayon parallelism
+- KNN → parallel distance computation
+- Bayes → parallel scoring
+- RandomForest / Boosting → parallel training
+
+---
+
+# 🧠 Model Selection Guide
+
+| Model | Best For |
+|------|---------|
+| KNN | Similarity / noisy text |
+| Bayes | Fast baseline |
+| Logistic | Fraud / production baseline |
+| SVM | Text classification |
+| RandomForest | Structured signals |
+| IsolationForest | Anomaly detection |
+
+---
+
+# 🧩 Example (Advanced CLI Override)
+
 ```bash
-sudo dnf install boost-devel cmake gcc gcc-c++
-```
-
-### Debian / Ubuntu
-```bash
-sudo apt install libboost-all-dev cmake build-essential
-```
-
-```bash
-cargo build --features vectorscan
+vec-eyes   --rules-yaml rules.yaml   --threads 8   --random-forest-n-trees 300   --classify-objects ./traffic/
 ```
 
 ---
 
-## 🤝 Contributing
+# 📊 Output
 
-Vec-Eyes is designed to evolve into a unified behavior intelligence engine.
+Example JSON output:
 
-We welcome contributions in:
-- ML improvements
-- Performance tuning
+```json
+{
+  "file": "sample.txt",
+  "classification": ["WEB_ATTACK"],
+  "score": 92.5
+}
+```
+
+---
+
+# 🤝 Contributing
+
+We welcome contributions:
+
 - New datasets
-- Security rules
-- Biological classification extensions
+- Performance improvements
+- New classifiers
+- Better YAML validation
 
 ---
+
+# 💬 Final Note
+
+Vec-Eyes CLI is not just a wrapper.
+
+It is a **production-grade behavior intelligence interface** designed to bridge:
+- ML pipelines
+- rule-based detection
+- real-world data workflows
+
+Built in Rust. Designed for performance. Ready for serious use.
+
 
 ## 👤 Author
 
