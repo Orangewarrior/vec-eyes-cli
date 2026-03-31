@@ -1,20 +1,17 @@
 [package]
 name = "vec-eyes-cli"
-version = "0.3.0"
+version = "0.2.0"
 edition = "2021"
 license = "MIT"
-authors = ["Orangewarrior"]
+description = "CLI for Vec-Eyes behavior intelligence engine"
 
 [[bin]]
 name = "vec-eyes"
 path = "src/main.rs"
 
-[features]
-default = []
-vectorscan = ["vec-eyes-lib/vectorscan"]
-
 [dependencies]
-clap = { version = "4", features = ["derive"] }
-rayon = "1.10"
+clap = { version = "4.5", features = ["derive"] }
 serde_yaml = "0.9"
+serde_json = "1.0"
+chrono = "0.4"
 vec-eyes-lib = { path = "../vec-eyes-lib" }
